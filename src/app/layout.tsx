@@ -13,7 +13,7 @@ const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "Alias Client",
-  description: "An example app with Alias integrated.",
+  description: "An example app using Alias.",
 };
 
 export default function RootLayout({

@@ -1,10 +1,9 @@
 "use client";
 
-import { useAccount, useChainId, useChains, useConnect, useDisconnect, useSendTransaction, useSignMessage, useSignTypedData, useSwitchChain, useWriteContract } from "wagmi";
+import { useAccount, useChainId, useConnect, useDisconnect, useSendTransaction, useSignMessage, useSignTypedData, useSwitchChain } from "wagmi";
 import { Button } from "./ui/button";
-import { useEffect, useState } from "react";
-import { parseAbi, parseEther } from "viem";
-import { useSendCalls, useWriteContracts } from "wagmi/experimental";
+import { useEffect } from "react";
+import { useSendCalls } from "wagmi/experimental";
 import { toast } from "sonner";
 import {
   Select,
@@ -17,8 +16,7 @@ import {
 export function Wallet({ address }: { address: string }) {
   const { address: connectedAddress, isConnected } = useAccount()
   const { connect, connectors } = useConnect()
-  const { disconnect } = useDisconnect()
-  const [connected, setConnected] = useState(false)
+  const { disconnect, disconnectAsync, isError: isDisconnectError, reset } = useDisconnect()
 
   const { switchChain, chains } = useSwitchChain()
   const chainId = useChainId()
@@ -58,11 +56,25 @@ export function Wallet({ address }: { address: string }) {
 
   // handle auto-connect on address change
   useEffect(() => {
-    if (address && !connectedAddress && !isConnected && !connected) {
+    if (address && !isConnected) {
       connect({ connector: connectors[0] })
-      setConnected(true)
     }
-  }, [address, connectedAddress, isConnected, connect, connectors, connected])
+    if ((isConnected||address) && !address) {
+      if (disconnect) {
+        disconnect()
+      }
+    }
+    if (address && address && (address.toLowerCase() !== address.toLowerCase())) {
+      if (disconnectAsync) {
+        disconnectAsync()
+          .then(() => connect({ connector: connectors[0] }))
+          .catch((error) => console.error("Error disconnecting:", error))
+      }
+    }
+    if (isDisconnectError && isConnected) {
+      reset()
+    }
+  }, [isConnected, connectors, address, connectedAddress, connect, disconnect, disconnectAsync, isDisconnectError, reset])
 
   // handle transaction status
   useEffect(() => {
@@ -176,17 +188,6 @@ export function Wallet({ address }: { address: string }) {
       <h1>Wallet connected: {isConnected ? "Yes" : "No"}</h1>
       <h1>Chain: {chainId}</h1>
       <div className="flex flex-row w-full items-center gap-2 my-2">
-        <Button variant="outline" onClick={() => {
-          if (isConnected) return disconnect()
-          return connect({ connector: connectors[0] })
-        }}>
-          {!isConnected ? "Connect" : "Disconnect"}
-        </Button>
-        <Button variant="outline" onClick={() => {
-          console.log("Connected Address:", connectedAddress)
-        }}>
-          Check Connected Address
-        </Button>
         <Select
           value={chainId.toString()}
           onValueChange={(value) => {

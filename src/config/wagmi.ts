@@ -10,7 +10,6 @@ import {
   optimismSepolia, 
   baseSepolia, 
   arbitrumSepolia, 
-  foundry, 
 } from 'wagmi/chains'
 
 export const wagmiConfig = createConfig({
@@ -19,7 +18,6 @@ export const wagmiConfig = createConfig({
     optimismSepolia,
     baseSepolia,
     arbitrumSepolia,
-    foundry, 
   ],
   connectors: [
     alias({
@@ -37,6 +35,5 @@ export const wagmiConfig = createConfig({
     [optimismSepolia.id]: http('https://optimism-sepolia-rpc.publicnode.com'),
     [baseSepolia.id]: http('https://base-sepolia-rpc.publicnode.com'),
     [arbitrumSepolia.id]: http('https://arbitrum-sepolia-rpc.publicnode.com'),
-    [foundry.id]: http('http://localhost:8545'),
   }
 })
